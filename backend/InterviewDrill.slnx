@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/InterviewDrill.Agents/InterviewDrill.Agents.csproj" />
+    <Project Path="src/InterviewDrill.Api/InterviewDrill.Api.csproj" />
+    <Project Path="src/InterviewDrill.Core/InterviewDrill.Core.csproj" />
+    <Project Path="src/InterviewDrill.Infrastructure/InterviewDrill.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/InterviewDrill.Agents.Tests/InterviewDrill.Agents.Tests.csproj" />
+    <Project Path="tests/InterviewDrill.Api.Tests/InterviewDrill.Api.Tests.csproj" />
+    <Project Path="tests/InterviewDrill.Core.Tests/InterviewDrill.Core.Tests.csproj" />
+    <Project Path="tests/InterviewDrill.Infrastructure.Tests/InterviewDrill.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  security:
+    name: Secret scan (block credentials from reaching the repo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for API keys, tokens and private keys
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $pattern = 'nvapi-[A-Za-z0-9_-]{20,}|sk-(proj-)?[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|oc_sk_[A-Za-z0-9]{20,}|-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----'
+          $files = Get-ChildItem -Recurse -File |
+            Where-Object {
+              $_.FullName -notmatch '[\\/](node_modules|bin|obj|TestResults|dist)[\\/]' -and
+              # test fixtures intentionally embed fake credentials to prove the PII sanitizer works
+              $_.FullName -notmatch '[\\/](tests|test)[\\/]'
+            }
+          $hits = foreach ($f in $files) {
+            Select-String -Path $f.FullName -Pattern $pattern -EA SilentlyContinue
+          }
+          if ($hits) {
+            $hits | ForEach-Object { Write-Host "::error file=$($_.Path),line=$($_.LineNumber)::Possible secret detected" }
+            exit 1
+          }
+          Write-Host 'Secret scan clean.'
+
+  backend:
+    name: Backend (.NET 11) build + tests + coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 11
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '11.0.x'
+          include-prerelease: true
+
+      - name: Restore
+        run: dotnet restore backend/InterviewDrill.slnx
+
+      - name: Build (Release)
+        run: dotnet build backend/InterviewDrill.slnx --nologo -c Release --no-restore
+
+      - name: Test with coverage (generated code excluded)
+        run: >-
+          dotnet test backend/InterviewDrill.slnx --nologo -c Release --no-build
+          --collect:"XPlat code coverage"
+          --settings backend/coverage.runsettings
+          --results-directory TestResults
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codecoverage
+          path: '**/TestResults/**/coverage.cobertura.xml'
+
+  frontend:
+    name: Frontend (React 19) lint + test + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint (oxlint)
+        run: npm run lint
+
+      - name: Test (vitest)
+        run: npm run test
+
+      - name: Build (tsc + vite)
+        run: npm run build
+
+  e2e:
+    name: E2E smoke (in-memory)
+    runs-on: windows-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 11
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '11.0.x'
+          include-prerelease: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build backend
+        run: dotnet build backend/InterviewDrill.slnx --nologo
+
+      - name: Install frontend deps
+        run: npm ci
+        working-directory: frontend
+
+      # In-memory mode: no SQL Server needed. The DB-integration gate
+      # (scripts/e2e-smoke.ps1 -UseDatabase) runs locally / in the
+      # self-hosted runner that has SQL Server Express or Azure SQL.
+      - name: E2E smoke (in-memory, anti-repetition)
+        shell: pwsh
+        run: ./scripts/e2e-smoke.ps1

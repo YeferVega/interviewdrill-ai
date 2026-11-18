@@ -1,0 +1,8 @@
+{
+  "mcp": {
+    "spec-kit": {
+      "type": "local",
+      "command": ["npx", "-y", "@anyicode/spec-kit-mcp@latest"]
+    }
+  }
+}

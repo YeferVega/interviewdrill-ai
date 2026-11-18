@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InterviewDrill AI - Evaluador de Arquitectura</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .results {
+      display: none;
+    }
+
+    .results.visible {
+      display: block;
+    }
+
+    .score-section {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .score-box {
+      text-align: center;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      min-width: 200px;
+    }
+
+    .score-value {
+      font-size: 3em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .score-label {
+      font-size: 0.9em;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-excellent { color: #28a745; }
+    .score-good { color: #17a2b8; }
+    .score-average { color: #ffc107; }
+    .score-poor { color: #dc3545; }
+
+    .keywords-section {
+      margin-bottom: 25px;
+    }
+
+    .keywords-title {
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .keywords-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .keyword-tag {
+      background: #e7f3ff;
+      color: #0066cc;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+
+    .keyword-tag.detected {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .keyword-tag.missed {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .keyword-tag.antipattern {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .performance-info {
+      text-align: center;
+      color: #666;
+      font-size: 0.9em;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .error.visible {
+      display: block;
+    }
+
+    .strengths-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .strengths-list li {
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #f8f9fa;
+      border-left: 4px solid #28a745;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2em;
+      }
+
+      .score-section {
+        flex-direction: column;
+      }
+
+      .score-box {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎯 InterviewDrill AI</h1>
+      <p class="subtitle">Evaluador de Arquitectura Técnica</p>
+    </header>
+
+    <div class="card">
+      <form id="evaluationForm">
+        <div class="form-group">
+          <label for="topic">Tópico de Entrevista</label>
+          <select id="topic" required>
+            <option value="">Selecciona un tópico...</option>
+            <option value="GenAI Architecture">Arquitectura GenAI</option>
+            <option value="RAG Implementation">Implementación RAG</option>
+            <option value="Production Systems">Sistemas de Producción</option>
+            <option value="Cloud Architecture">Arquitectura Cloud</option>
+            <option value="Microservices">Microservicios</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="response">Respuesta del Candidato</label>
+          <textarea 
+            id="response" 
+            placeholder="Ingresa la respuesta técnica del candidato aquí..."
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn">
+          🔍 Evaluar Respuesta
+        </button>
+      </form>
+
+      <div class="error" id="errorBox"></div>
+
+      <div class="loading" id="loadingBox" style="display: none;">
+        <div class="spinner"></div>
+        <p>Analizando respuesta...</p>
+      </div>
+    </div>
+
+    <div class="results card" id="resultsBox">
+      <h2 style="margin-bottom: 25px;">📊 Resultados de Evaluación</h2>
+      
+      <div class="score-section">
+        <div class="score-box">
+          <div class="score-value" id="technicalDepthScore">--</div>
+          <div class="score-label">Profundidad Técnica</div>
+        </div>
+        <div class="score-box">
+          <div class="score-value" id="conceptsDetected">--</div>
+          <div class="score-label">Conceptos Detectados</div>
+        </div>
+        <div class="score-box">
+          <div class="score-value" id="antiPatternsCount">--</div>
+          <div class="score-label">Anti-Patrones</div>
+        </div>
+      </div>
+
+      <div class="keywords-section">
+        <h3 class="keywords-title">✅ Conceptos Detectados</h3>
+        <div class="keywords-list" id="detectedKeywords"></div>
+      </div>
+
+      <div class="keywords-section">
+        <h3 class="keywords-title">⚠️ Conceptos No Cubiertos</h3>
+        <div class="keywords-list" id="missedKeywords"></div>
+      </div>
+
+      <div class="keywords-section" id="antiPatternsSection" style="display: none;">
+        <h3 class="keywords-title">🚫 Anti-Patrones Detectados</h3>
+        <div class="keywords-list" id="antiPatterns"></div>
+      </div>
+
+      <div class="keywords-section" id="strengthsSection" style="display: none;">
+        <h3 class="keywords-title">💪 Fortalezas Identificadas</h3>
+        <ul class="strengths-list" id="strengths"></ul>
+      </div>
+
+      <div class="performance-info" id="performanceInfo"></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('evaluationForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingBox = document.getElementById('loadingBox');
+    const resultsBox = document.getElementById('resultsBox');
+    const errorBox = document.getElementById('errorBox');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const topic = document.getElementById('topic').value;
+      const response = document.getElementById('response').value;
+      
+      if (!topic || !response) {
+        showError('Por favor completa todos los campos');
+        return;
+      }
+
+      // Show loading
+      submitBtn.disabled = true;
+      loadingBox.style.display = 'block';
+      resultsBox.classList.remove('visible');
+      errorBox.classList.remove('visible');
+
+      try {
+        const sessionId = `session-${Date.now()}`;
+        
+        const apiResponse = await fetch('http://localhost:3000/api/evaluate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: response,
+            topic,
+            sessionId
+          })
+        });
+
+        if (!apiResponse.ok) {
+          throw new Error('Error en la evaluación');
+        }
+
+        const data = await apiResponse.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Error desconocido');
+        }
+
+        displayResults(data.result, data.performance);
+      } catch (error) {
+        showError(error.message || 'Error al conectar con el servidor. Asegúrate de que el servidor esté ejecutándose.');
+      } finally {
+        submitBtn.disabled = false;
+        loadingBox.style.display = 'none';
+      }
+    });
+
+    function displayResults(result, performance) {
+      // Technical Depth Score
+      const depthScoreEl = document.getElementById('technicalDepthScore');
+      depthScoreEl.textContent = result.technicalDepth;
+      depthScoreEl.className = 'score-value ' + getScoreClass(result.technicalDepth);
+
+      // Concepts Detected
+      document.getElementById('conceptsDetected').textContent = result.coveredKeywords.length;
+
+      // Anti-Patterns Count
+      document.getElementById('antiPatternsCount').textContent = result.antiPatterns.length;
+
+      // Detected Keywords
+      const detectedContainer = document.getElementById('detectedKeywords');
+      detectedContainer.innerHTML = result.coveredKeywords
+        .map(kw => `<span class="keyword-tag detected">${kw}</span>`)
+        .join('');
+
+      // Missed Keywords
+      const missedContainer = document.getElementById('missedKeywords');
+      missedContainer.innerHTML = result.missedConcepts
+        .map(kw => `<span class="keyword-tag missed">${kw}</span>`)
+        .join('');
+
+      // Anti-Patterns
+      const antiPatternsSection = document.getElementById('antiPatternsSection');
+      if (result.antiPatterns.length > 0) {
+        antiPatternsSection.style.display = 'block';
+        document.getElementById('antiPatterns').innerHTML = result.antiPatterns
+          .map(ap => `<span class="keyword-tag antipattern">${ap}</span>`)
+          .join('');
+      } else {
+        antiPatternsSection.style.display = 'none';
+      }
+
+      // Strengths
+      const strengthsSection = document.getElementById('strengthsSection');
+      if (result.strengths && result.strengths.length > 0) {
+        strengthsSection.style.display = 'block';
+        document.getElementById('strengths').innerHTML = result.strengths
+          .map(s => `<li>${s}</li>`)
+          .join('');
+      } else {
+        strengthsSection.style.display = 'none';
+      }
+
+      // Performance
+      document.getElementById('performanceInfo').textContent = 
+        `⚡ Evaluación completada en ${performance.duration}`;
+
+      // Show results
+      resultsBox.classList.add('visible');
+      resultsBox.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function getScoreClass(score) {
+      if (score >= 80) return 'score-excellent';
+      if (score >= 60) return 'score-good';
+      if (score >= 40) return 'score-average';
+      return 'score-poor';
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add('visible');
+      setTimeout(() => {
+        errorBox.classList.remove('visible');
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

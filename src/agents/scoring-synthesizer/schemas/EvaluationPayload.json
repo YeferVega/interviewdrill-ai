@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvaluationPayload",
+  "description": "Final evaluation payload returned to the candidate with scoring and feedback",
+  "type": "object",
+  "required": [
+    "overallScore",
+    "technicalDepth",
+    "productionReadiness",
+    "verdict",
+    "coveredKeywords",
+    "missedConcepts",
+    "strengths",
+    "improvementAdvice"
+  ],
+  "properties": {
+    "overallScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Overall weighted score from 0-100"
+    },
+    "technicalDepth": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Technical depth component score from 0-100"
+    },
+    "productionReadiness": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Production readiness component score from 0-100"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["PASS", "NEEDS_PRACTICE", "FAIL"],
+      "description": "Final verdict based on overall score"
+    },
+    "coveredKeywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All technical concepts that were covered (merged, no duplicates)"
+    },
+    "missedConcepts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All important concepts that were missed (merged, no duplicates)"
+    },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All strengths identified (merged, no duplicates)"
+    },
+    "improvementAdvice": {
+      "type": "string",
+      "description": "Actionable advice for improvement based on missed concepts"
+    }
+  },
+  "additionalProperties": false
+}

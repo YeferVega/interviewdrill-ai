@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Filtro de coverage para medir lógica escrita a mano: excluye migraciones y código generado de EF. -->
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Exclude>
+            [*.Migrations*]*,
+            [*]*_*.Designer_*
+          </Exclude>
+          <ExcludeByAttribute>
+            System.CodeDom.Compiler.GeneratedCodeAttribute,
+            System.Runtime.CompilerServices.CompilerGeneratedAttribute,
+            Microsoft.EntityFrameworkCore.Migrations.MigrationAttribute
+          </ExcludeByAttribute>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

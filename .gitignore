@@ -1,0 +1,95 @@
+# Dependencies
+node_modules/
+package-lock.json
+# CI needs the frontend lockfile (npm ci + action cache); it holds no secrets
+!frontend/package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# .NET build output
+bin/
+obj/
+TestResults/
+*.user
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==== SENSITIVE DATA — never commit ====
+# Environment files (only the examples are shareable)
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+
+# ASP.NET secrets: real keys belong to `dotnet user-secrets` (stored at
+# %APPDATA%\Microsoft\UserSecrets\<UserSecretsId>\secrets.json, outside the repo)
+secrets.json
+appsettings.Secrets.json
+appsettings.*.Secrets.json
+appsettings.*.local.json
+appsettings.Production.json
+# IDE run profiles often stash env-var secrets — keep local
+backend/src/InterviewDrill.Api/Properties/launchSettings.json
+
+# Certificates & private keys
+*.pfx
+*.p12
+*.key
+*.pem
+*.jks
+*.keystore
+*.kdbx
+*.ppk
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+
+# Cloud / tool credentials
+credentials
+credentials*.json
+*service-account*.json
+.aws/
+.gcloud/
+.npmrc
+.netrc
+_netrc
+.git-credentials
+
+# Local database files and dumps
+*.mdf
+*.ldf
+*.bak
+*.dump
+*.sqlite
+*.sqlite3
+*.db
+
+# Temporary / generated
+tmp/
+temp/
+coverage/
+*.tmp
+*.cache
