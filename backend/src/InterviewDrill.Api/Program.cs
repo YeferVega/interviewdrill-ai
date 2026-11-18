@@ -17,7 +17,6 @@ using InterviewDrill.Core.Pdf;
 using InterviewDrill.Core.Persistence;
 using InterviewDrill.Core.Scoring;
 using InterviewDrill.Core.Security;
-using InterviewDrill.Core.Security;
 using InterviewDrill.Infrastructure;
 using InterviewDrill.Infrastructure.Caching;
 using InterviewDrill.Infrastructure.Documents;
@@ -32,7 +31,6 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging.Console;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,8 +60,10 @@ builder.Services.AddSingleton<IPiiSanitizer, RegexPiiSanitizer>();
 
 // Logging estructurado sin PII ni secretos: envuelve el proveedor de consola para
 // sanitizar PII y credenciales antes de escribir a cualquier sink de log.
-var _piiSanitizer = builder.Services.BuildServiceProvider().GetRequiredService<IPiiSanitizer>();
-builder.Logging.AddProvider(new PiiSanitizingLoggerProvider(_piiSanitizer, new ConsoleLoggerProvider(new SimpleOptionsMonitor<ConsoleLoggerOptions>(new ConsoleLoggerOptions()))));
+// Instancia directa (sin BuildServiceProvider): mismo objeto registrado en el contenedor.
+var piiSanitizer = new RegexPiiSanitizer();
+builder.Services.AddSingleton(piiSanitizer);
+builder.Logging.AddProvider(new PiiSanitizingLoggerProvider(piiSanitizer, new ConsoleLoggerProvider(new SimpleOptionsMonitor<ConsoleLoggerOptions>(new ConsoleLoggerOptions()))));
 builder.Services.AddSingleton<IJdDocumentTextExtractor, JdDocumentTextExtractor>();
 
 // Configuración de proveedores LLM (Azure OpenAI / Azure Foundry, Bedrock, Ollama)

@@ -14,7 +14,6 @@ namespace InterviewDrill.Infrastructure.Tests.Caching;
 public sealed class FakeEmbeddingGenerator : IEmbeddingGenerator
 {
     private readonly Dictionary<string, float[]> _vectors = new(StringComparer.OrdinalIgnoreCase);
-    private int _counter;
 
     public float[] this[string text]
     {

@@ -44,7 +44,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '11.0.x'
-          include-prerelease: true
 
       - name: Restore
         run: dotnet restore backend/InterviewDrill.slnx
@@ -105,7 +104,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '11.0.x'
-          include-prerelease: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
